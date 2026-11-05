@@ -47,4 +47,4 @@ Run the downloaded `.run --profile aggressive` as an ordinary user. It provision
 Each package owns only this provider and its passive documentation. Its `Replaces` declaration transfers this module from `infiltrator-calendar-resources` on existing machines; other modules and Common source remain intact. Native package versions use `+native1` so a same-version generic package does not replace a local optimized build. See [packaging details](docs/PACKAGING.md).
 
 ## Two-file installed calendar (v1.0.2)
-Only `Ethiopian Amete Mihret Calendar.so` and `Ethiopian Amete Mihret Calendar.pdf` are installed. Native build provenance belongs in Debian metadata; technical development records stay in GitHub.
+Only `Ethiopian Amete Mihret Calendar.so` and `Calendar-Ethiopian.pdf` are installed. Native build provenance belongs in Debian metadata; technical development records stay in GitHub.
