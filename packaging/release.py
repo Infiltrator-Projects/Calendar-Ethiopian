@@ -79,6 +79,9 @@ def check_requirements():
         has_utf8 = any(name.lower().replace("-", "").endswith(".utf8") and not name.lower().startswith("c.") for name in available)
         if not has_utf8 and (not shutil.which("localedef") or not Path("/usr/share/i18n/locales/en_US").exists()):
             missing.append("UTF-8 locale data (locales)")
+    if subprocess.run([sys.executable, "-c", "import reportlab"], stdout=subprocess.DEVNULL,
+                      stderr=subprocess.DEVNULL).returncode != 0:
+        missing.append("python3-reportlab")
     dependencies = MANIFEST["build_dependencies"]
     if not missing and dependencies:
         if subprocess.run(["pkg-config", "--exists", *dependencies]).returncode:
@@ -98,9 +101,6 @@ def ensure_requirements(provision):
     packages = ["build-essential", "binutils", "pkg-config", "python3", "python3-reportlab"]
     if (ROOT / "i18n/LINGUAS").exists():
         packages += ["gettext", "locales"]
-    if subprocess.run([sys.executable, "-c", "import reportlab"], stdout=subprocess.DEVNULL,
-                      stderr=subprocess.DEVNULL).returncode != 0:
-        missing.append("python3-reportlab")
     if "glib-2.0" in MANIFEST["build_dependencies"]:
         packages.append("libglib2.0-dev")
     if "icu-i18n" in MANIFEST["build_dependencies"]:
