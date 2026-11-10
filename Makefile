@@ -3,7 +3,6 @@
 .DEFAULT_GOAL := all
 CC ?= cc
 PKG_CONFIG ?= pkg-config
-PYTHON ?= python3
 BUILD_DIR ?= build
 RESOURCE_NAME := Ethiopian Amete Mihret Calendar
 COMMON_DIR := common
@@ -13,15 +12,7 @@ COMMON_BUILD_DIR := $(abspath $(BUILD_DIR))/common
 COMMON_ARCHIVE := $(COMMON_BUILD_DIR)/libinfiltratr-common.a
 DEPENDENCIES := glib-2.0 icu-i18n
 SOURCES := $(shell find src -type f -name '*.c' | LC_ALL=C sort)
-# Embed any provider translations directly into its SO.
-ifneq ($(wildcard i18n/LINGUAS),)
-EMBEDDED_TRANSLATIONS := $(BUILD_DIR)/embedded-translations.c
-SOURCES += $(EMBEDDED_TRANSLATIONS)
-CPPFLAGS += -Dg_dgettext=infiltratr_embedded_dgettext
-$(EMBEDDED_TRANSLATIONS): packaging/embed_translations.py i18n/LINGUAS $(wildcard i18n/*.po)
-	@mkdir -p "$(BUILD_DIR)"
-	$(PYTHON) packaging/embed_translations.py "$@"
-endif
+OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/obj/%.o,$(SOURCES))
 TARGET := $(BUILD_DIR)/$(RESOURCE_NAME).so
 ifneq ($(strip $(DEPENDENCIES)),)
 DEP_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(DEPENDENCIES))
@@ -46,27 +37,31 @@ common-check:
 	@if test -e common/.git; then git -C common rev-parse HEAD | grep -qx "$(COMMON_REVISION)"; fi
 	@test ! -d include/infiltratr || { echo "Copied Common headers forbidden" >&2; exit 1; }
 	@test ! -f src/arithmetic.c -a ! -f src/core.c -a ! -f src/dynlib.c -a ! -f src/temporal.c || { echo "Private Common sources forbidden" >&2; exit 1; }
-$(COMMON_ARCHIVE): common-check
+$(COMMON_ARCHIVE): Makefile | common-check
 	@mkdir -p "$(COMMON_BUILD_DIR)"
 	$(MAKE) -C common CC="$(CC)" BUILD_DIR="$(COMMON_BUILD_DIR)" CFLAGS="$(CFLAGS) -Wno-missing-profile" all
+$(BUILD_DIR)/obj/%.o: src/%.c Makefile | common-check
+	@mkdir -p "$(@D)"
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEP_CFLAGS) -MMD -MP -c "$<" -o "$@"
 .PHONY: all check audit-authorities clean
-all: $(COMMON_ARCHIVE) $(EMBEDDED_TRANSLATIONS)
+all: $(TARGET)
+$(TARGET): $(OBJECTS) $(COMMON_ARCHIVE) exports.map Makefile
 	@mkdir -p "$(BUILD_DIR)"
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEP_CFLAGS) -shared $(SOURCES) $(COMMON_ARCHIVE) \
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEP_CFLAGS) -shared $(OBJECTS) $(COMMON_ARCHIVE) \
 	    -Wl,--version-script=exports.map -Wl,-z,defs -Wl,--gc-sections \
 	    $(LDFLAGS) -o "$(TARGET)" $(LDLIBS)
-check: all
-	$(PYTHON) tests/check_provider.py "$(TARGET)"
-	LANGUAGE=en_US LC_ALL=C.UTF-8 $(PYTHON) tests/check_accuracy.py "$(TARGET)"
-audit-authorities: all
-	LANGUAGE=en_US LC_ALL=C.UTF-8 $(PYTHON) tests/check_accuracy.py "$(TARGET)" --authorities
+check: $(TARGET)
+	bash common/calendar-tools/check.sh "$(TARGET)"
+audit-authorities: $(TARGET)
+	bash common/calendar-tools/check.sh "$(TARGET)" --authorities
+-include $(OBJECTS:.o=.d)
 clean:
 	rm -rf "$(BUILD_DIR)"
 
 .PHONY: release deb native-deb
 release:
-	$(PYTHON) packaging/release.py release
+	bash common/calendar-tools/build.sh release
 deb:
-	$(PYTHON) packaging/release.py deb --profile portable
+	bash common/calendar-tools/build.sh deb --profile portable
 native-deb:
-	$(PYTHON) packaging/release.py deb --profile aggressive
+	bash common/calendar-tools/build.sh deb --profile aggressive
