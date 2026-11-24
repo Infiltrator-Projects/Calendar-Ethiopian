@@ -14,7 +14,7 @@ The provider owns fields, localized formatting, period starts and navigation. Fi
 
 **Independent source, native installation and releases.** This repository contains the implementation of `ethiopian`, the supporting code it needs, a one-provider `Makefile` and focused regression fixtures. The copy is based on Common 1.19.78 at `8d60662114e3`; the original Common source remains unchanged.
 
-Run `make` to produce `build/Ethiopian Amete Mihret Calendar.so` and `make check` to run this provider's checks. The Makefile builds a pinned Common static archive from the `common` Git submodule; initialise it with `git submodule update --init -- common` before running `make`. Independent releases now provide a portable amd64 Debian package, a hardware-native source installer and the complete source ZIP. The original Common source is retained.
+Run `make` to produce `build/Ethiopian Amete Mihret Calendar.so` and `make check` to run this provider's checks. The Makefile builds a pinned Common static archive from the `common` Git submodule; initialise it with `git submodule update --init -- common` before running `make`. Independent releases now provide a portable amd64 Debian package, a small hardware-native network installer; GitHub supplies the automatic tag source ZIP. The original Common source is retained.
 
 See [source provenance and build details](SOURCE.md), [source manifest](SOURCE-MANIFEST.json) and [recorded validation](VALIDATION-RESULTS.json).
 
@@ -40,7 +40,7 @@ See [audit findings](docs/FORENSIC-AUDIT.md) for corrections, numerical-model li
 
 ## Release and installation
 
-Run `make release` to qualify and create exactly three assets in `dist/`: a portable amd64 `.deb`, a `-native-installer.run`, and a complete `-source.zip`. Linux releases are built and installed by GitHub Actions before publication.
+Run `make release` to qualify and create exactly two uploaded assets in `dist/`: a portable amd64 `.deb` and a text-only `-native-installer.run`. Linux releases are built and installed by GitHub Actions before publication.
 
 Run the downloaded `.run --profile aggressive` as an ordinary user. It provisions missing build prerequisites, compiles for the local CPU with `-O3`, LTO and measured two-pass PGO, checks the final module, then installs a native Debian package through sudo. InfiltratorOS invokes `--profile aggressive --system-package-mode` from its serialized installation worker. `--build-only --output DIRECTORY` qualifies a native package without installing it.
 
@@ -48,3 +48,5 @@ Each package owns only this provider and its passive documentation. Its `Replace
 
 ## Two-file installed calendar (v1.0.2)
 Only `Ethiopian Amete Mihret Calendar.so` and `Calendar-Ethiopian.pdf` are installed. Native build provenance belongs in Debian metadata; technical development records stay in GitHub.
+
+Native release installers fetch the exact provider Git commit and its pinned Common submodule, verify both identities, and build locally. No source or binary payload is embedded in the RUN; GitHub provides its automatic source archive separately.
