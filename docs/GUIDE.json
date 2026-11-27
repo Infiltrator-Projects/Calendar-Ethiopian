@@ -2,7 +2,7 @@
   "title": "Ethiopian Amete Mihret Calendar",
   "intro": "The Ethiopian Amete Mihret calendar is a living civil and religious chronology used in Ethiopia.",
   "epoch": "Amete Mihret means Years of Mercy. Its Christian-era numbering differs from the Gregorian era by approximately seven or eight years, depending on the date.",
-  "structure": "The first twelve months contain thirty days each. Pagume, the thirteenth, contains five days in ordinary years and six in the Alexandrian-style four-year leap cycle.",
+  "structure": "The first twelve months contain 30 days each. Pagume, the thirteenth, contains five days ordinarily and six when the arithmetic year has positive remainder 3 modulo 4.",
   "month_names": [
     "Meskerem",
     "Tikimt",
@@ -20,11 +20,12 @@
   ],
   "example": "After Nehase 30 comes Pagume; after its final day the year begins at Meskerem 1. In contemporary Gregorian dates this usually falls on 11 or 12 September.",
   "history": "The calendar descends from the Alexandrian tradition. Its months remain central to Ethiopian civil and religious life, including Enkutatash (New Year).",
-  "model": "The provider implements the Amete Mihret arithmetic chronology; the month/day fields and period navigation refer to the same underlying day.",
+  "model": "The Amete Mihret arithmetic epoch is JDN 1724221. For year y, month m and day d, JDN = 1724221 - 1 + 365*(y-1) + floor(y/4) + 30*(m-1) + d. The inverse year is floor((4*(JDN-1724221)+1463)/1461). Month/day fields and period navigation refer to the same underlying day.",
   "limits": "Not interchangeable with the separate Amete Alem era or the Ethiopian clock convention. Gregorian correspondences shift over long historical ranges.",
   "sources": [
     "https://www.etcal.net/months.html",
     "https://github.com/Infiltrator-Projects/Calendar-Ethiopian",
-    "Model evidence: https://github.com/Infiltrator-Projects/Calendar-Ethiopian/blob/main/docs/MODEL.md"
+    "Model evidence: https://github.com/Infiltrator-Projects/Calendar-Ethiopian/blob/main/docs/MODEL.md",
+    "Arithmetic implementation: https://github.com/Infiltrator-Projects/Calendar-Ethiopian/blob/main/src/calendars/engine/calendar-arithmetic-coptic.c"
   ]
 }
